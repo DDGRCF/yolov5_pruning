@@ -6,7 +6,7 @@ import numpy as np
 from models.experimental import attempt_load
 from utils.torch_utils import select_device 
 from utils.augmentations import letterbox
-from utils.general import non_max_suppression, scale_coords, xyxy2xywh
+from utils.general import non_max_suppression, scale_coords
 from utils.plots import plot_one_box, colors
 @torch.no_grad()
 def run(opt):
@@ -32,10 +32,9 @@ def run(opt):
     
         pred = model(img)[0]
         det = non_max_suppression(pred, 0.25, 0.45)[0]
-        gn = torch.tensor(img0.shape)[[1, 0, 1, 0]]
         if len(det):
             det[:, :4] = scale_coords(img.shape[2: ], det[:, :4], img0.shape).round()
-            for *xyxy, conf, cls in reversed(det):
+            for *xyxy,_, cls in reversed(det):
                 c = int(cls)
                 label = names[c]
                 plot_one_box(xyxy, img0, label=label, color=colors(c, True), line_thickness=3)
@@ -54,9 +53,9 @@ def Image_deal(img0, img_size, stride):
 
 def get_opt():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--weights', type=str, default='/media/r/文档/CV-Works/CV-Scripts/Yolov5_Pruning/yolov5_Chinese/runs/train/exp30_0.5p_train/weights/pruning_best_pruning.pt')
-    parser.add_argument('--data', type=str, default='data/fire.yaml')
-    parser.add_argument('--cfg', type=str, default='models/yolov5l.yaml')
+    parser.add_argument('weights', type=str, default='/runs/train/train_weights.pth')
+    parser.add_argument('data', type=str, default='data/fire.yaml')
+    parser.add_argument('cfg', type=str, default='models/yolov5l.yaml')
     parser.add_argument('--device', type=str, default='cpu')
     parser.add_argument('--use-pruning', action='store_true')
 
