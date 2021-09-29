@@ -73,16 +73,14 @@ class Mask:
         for key in range(self.layer_begin, self.layer_end, self.layer_inter):
             self.compress_rate[key] = layer_rate
         last_index = 321
-        skip_list = self.opt.skip_list 
-        # [0,3, 
-        # 6,15,21,27,
-        # 36,45,51,57,63,69,75,81,87,93,
-        # 102,111,117,123,129,135,141,147,153,159,
-        # 174,183,189,195,
-        # 258,288,318]
+        skip_list =  [0,3, 
+                      6,15,21,27,
+                      36,45,51,57,63,69,75,81,87,93,
+                      102,111,117,123,129,135,141,147,153,159,
+                      174,183,189,195,
+                      258,288,318]
         # self.opt.skip_list 
         # [x for x in range(0, last_index, 3) if x not in range(0, 201, 3)]
-
         # [x for x in range(0, last_index, 3) if x not in range(0, 33, 3)]
         self.mask_index = [x for x in range(0, last_index, 3)]
         if self.opt.skip_downsample:
