@@ -25,6 +25,7 @@
 
 storage.googleapis.com
 runs/*
+weights/*
 !data/hyps/*.yaml
 !data/images/zidane.jpg
 !data/images/bus.jpg
