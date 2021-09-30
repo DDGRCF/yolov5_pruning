@@ -70,7 +70,7 @@ def train(hyp,  # path/to/hyp.yaml or hyp dictionary
     best = wdir / 'best.pt'
     results_file = save_dir / 'results.txt'
     if retrain:
-        from models.yolov5l_pruning import Model
+        from models.yolov5_pruning import Model
         pruning_cfg = Path(weights).parents[0] / opt.pruning_cfg
     else:
         from models.yolo import Model

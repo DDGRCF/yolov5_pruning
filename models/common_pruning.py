@@ -39,7 +39,7 @@ class Bottleneck(nn.Module):
     def forward(self, x):
         if self.add: 
             if x.size(1) == len(self.keep_index):
-                x = self.cv2(self.cv1(x))
+                x = self.cv2(self.cv1(x)) + x
             else:
                 if not self.training:
                     x.index_add_(1, self.keep_index, self.cv2(self.cv1(x)))

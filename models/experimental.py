@@ -112,7 +112,7 @@ class Ensemble(nn.ModuleList):
 
 def attempt_load(weights, map_location=None, pruning=False, inplace=True):
     if pruning:
-        from models.yolov5l_pruning import Detect, Model
+        from models.yolov5_pruning import Detect, Model
     else:
         from models.yolo import Detect, Model
 

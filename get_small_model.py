@@ -21,7 +21,7 @@ from copy import deepcopy
 from typing import OrderedDict
 
 from models.yolo import Model as Model
-from models.yolov5l_pruning import Model as Model_Pruning
+from models.yolov5_pruning import Model as Model_Pruning
 
 from utils.general import set_logging
 from utils.prune_utils import model_compare, model_eval, get_mask, setup_seed

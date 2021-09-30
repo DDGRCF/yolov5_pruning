@@ -63,7 +63,7 @@ $ pip install -r requirements.txt
 ```shell
 $ python train.py --epochs 220 --weights weights/yolov5l.pt --hyp hyp.finetune.yaml --cfg models/yolov5l.yaml --data data/fire.yaml --batch-size 16 --workers 8 --device 3 --use-pruning --layer-rate 0.4 --layer-gap 0,321,3 --skip-downsample --pruning-method SFP  --skip-list 0 3
 :<<! 
-其中use-pruning代表进行剪枝，layer-rate代表剪枝率（1为不剪枝），skip-list代表不需要剪枝的层（只能是0 3 6...， pruning-method代表使用剪枝的方法）
+其中use-pruning代表进行剪枝，layer-rate代表剪枝率（1为不剪枝），skip-list代表不需要剪枝的层（只能是0 3 6...， pruning-method代表使用剪枝的方法）(这个暂时不可用，如果启用请将utils、prune_utils.py的76行注释取消)
 !
 ```
 
@@ -77,7 +77,7 @@ $ python get_small_model.py --weights runs/train/exp*/weights/best_pruning.pt --
 
 #### 训练
 
-这个目前有点问题，原始算法的脚本和一些YOLOv3的剪枝脚本，BN scale仅需`1.0e-5~1.0e-2`左右，但我这里在不加载预训练模型，且把模型的BN初始化为`0.5`时，BN scale需要差不多`10~100`其BN weights才进行明显的稀疏，而加载预训练模型后则需要差不多`100~1000`才能进行明显的稀疏。（其中）
+这个目前有点问题，原始算法的脚本和一些YOLOv3的剪枝脚本，BN scale仅需`1.0e-5~1.0e-2`左右，但我这里在不加载预训练模型，且把模型的BN初始化为`0.5`时，BN scale需要差不多`10~100`其BN weights才进行明显的稀疏，而加载预训练模型后则需要差不多`100~1000`才能进行明显的稀疏。
 
 ```shell
 $ python train.py --epochs 300 --cfg models/yolov5l.yaml --data data/fire.yaml --batch-size 16 --device 0 --use-pruning --skip-list 0 3 --pruning-method Network_Slimming \
