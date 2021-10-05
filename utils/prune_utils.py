@@ -37,11 +37,17 @@ def setup_seed(seed):
     torch.backends.cudnn.deterministic = True
     
 def get_skip_list(model, skip_list):
+    skip_list = skip_list if skip_list is not None else \
+                [0,3, 
+                6,15,21,27,
+                36,45,51,57,63,69,75,81,87,93,
+                102,111,117,123,129,135,141,147,153,159,
+                174,183,189,195]
     layer = OrderedDict()
     for i, (name, _) in enumerate(model.named_parameters()):
         if name.endswith('.bn.weight'):
             layer[i - 1] = name.replace('.weight', '')
-    skip_list = [layer[k] for k in skip_list]
+    skip_list = [layer[k] for k in skip_list] \
     
     return skip_list
 class Mask:
@@ -73,15 +79,12 @@ class Mask:
         for key in range(self.layer_begin, self.layer_end, self.layer_inter):
             self.compress_rate[key] = layer_rate
         last_index = 321
-        skip_list =  [0,3, 
+        skip_list =  self.opt.skip_list if self.opt.skip_list is not None else \
+                     [0,3, 
                       6,15,21,27,
                       36,45,51,57,63,69,75,81,87,93,
                       102,111,117,123,129,135,141,147,153,159,
-                      174,183,189,195,
-                      258,288,318]
-        # self.opt.skip_list 
-        # [x for x in range(0, last_index, 3) if x not in range(0, 201, 3)]
-        # [x for x in range(0, last_index, 3) if x not in range(0, 33, 3)]
+                      174,183,189,195]
         self.mask_index = [x for x in range(0, last_index, 3)]
         if self.opt.skip_downsample:
             for x in skip_list:
@@ -166,29 +169,20 @@ def get_pruning_cfg(cfg):
     logging.info('the pruning configuration convertion is completed!')
     return new_cfg
 
-                
 # Network Slimming
 class BNOptimizer():
     def __init__(self, model, opt, **kwargs):
         self.model = model.module if is_parallel(model) else model
         self.opt = opt
-        self.s = 0.0
+        self.s = self.opt.s
         logger.info("BNoptimizer init is completed!")
 
-    def updateBN(self, epoch, keep_s=True, warmup_epoch=70):
+    def updateBN(self):
         for name, module in self.model.named_modules():
             if isinstance(module, nn.BatchNorm2d):
                 if name not in get_skip_list(self.model, self.opt.skip_list):
-                    module.weight.grad.data.add_((self.opt.s if keep_s else self.update_scale(epoch, warmup_epoch)) * torch.sign(module.weight.data))
+                    module.weight.grad.data.add_(self.s * torch.sign(module.weight.data))
     
-    def update_scale(self, epoch, warmup_epoch=30):
-        span = self.opt.s_span
-        if epoch < warmup_epoch:
-            self.s = max(span) - (max(span) - min(span)) * (epoch + 1) / warmup_epoch
-        else:
-            self.s = self.opt.s
-        return self.s
-
 
 def gather_bn_weights(model, skip_list):
     size_list = []

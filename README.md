@@ -4,8 +4,6 @@
 
 介绍
 
-这个项目是自己在暑期学习模型剪枝和YOLOv5写的，其中存在许多不足的之处还待继续完善
-
 本项目涉及的算法如下：
 
 1. YOLOv5的GITHUB地址：https://github.com/ultralytics/yolov5.git
@@ -13,6 +11,8 @@
 2. SFP的Paper地址：https://arxiv.org/abs/1808.07471
 
 3. Network Slimming的Paper地址：https://arxiv.org/abs/1708.06519
+
+4. Deep_Sort目标跟踪
 
 本仓库包含一下内容：
 
@@ -41,7 +41,7 @@ $ create -n yolov5 python=3.7 -y
 克隆仓库
 
 ```shell
-$ git clone https://github.com/DDGRCF/yolov5_Chinese.git
+$ git clone https://github.com/DDGRCF/yolov5_pruning.git
 ```
 
 `cd yolov5_Chinese `安装依赖
@@ -60,10 +60,12 @@ $ pip install -r requirements.txt
 
 #### 训练
 
+默认的剪枝层是跳过short_cut和每个stage的输出层的。另外如果你想要裁剪yolos等模型，你就得自己指定skip-list，skip-list需要跳过short-cut层(不跳过short_cut的话，由于我在short_cut中采用了SFP作者的并行操作，虽然减小了参数量但实际运行速度可能还增加。至于怎么知道第几层是short_cut层，把模型的named_parameters参数打印下来)
+
 ```shell
-$ python train.py --epochs 220 --weights weights/yolov5l.pt --hyp hyp.finetune.yaml --cfg models/yolov5l.yaml --data data/fire.yaml --batch-size 16 --workers 8 --device 3 --use-pruning --layer-rate 0.4 --layer-gap 0,321,3 --skip-downsample --pruning-method SFP  --skip-list 0 3
+$ python train.py --epochs 220 --weights weights/yolov5l.pt --hyp hyp.finetune.yaml --cfg models/yolov5l.yaml --data data/fire.yaml --batch-size 16 --workers 8 --device 3 --use-pruning --layer-rate 0.4 --layer-gap 0,321,3 --skip-downsample --pruning-method SFP  # --skip-list 0 3
 :<<! 
-其中use-pruning代表进行剪枝，layer-rate代表剪枝率（1为不剪枝），skip-list代表不需要剪枝的层（只能是0 3 6...， pruning-method代表使用剪枝的方法）(这个暂时不可用，如果启用请将utils、prune_utils.py的76行注释取消)
+其中use-pruning代表进行剪枝，layer-rate代表剪枝率（1为不剪枝），skip-list代表不需要剪枝的层（只能是0 3 6...， pruning-method代表使用剪枝的方法)
 !
 ```
 
@@ -73,6 +75,16 @@ $ python train.py --epochs 220 --weights weights/yolov5l.pt --hyp hyp.finetune.y
 $ python get_small_model.py --weights runs/train/exp*/weights/best_pruning.pt --cfg models/yolov5l.yaml --data data/fire.yaml --device 0
 ```
 
+#### 测试结果
+
+在GeForce GTX TITAN X的显卡上，在自己的火焰数据集(train:600,val:90,skip short cut)进行train(epoch:220)和val并求每张的平均时间(未剔除初期加载数据的时间)
+
+| Method | Metric | Speed(ms) |
+| ----   | ----   | ----      | 
+| Origin | 37.0   | 34.89     |
+| Big    | 37.5   | 34.70     |
+| Small  | 37.3   | 25.75     |
+
 ### Network_Slimming
 
 #### 训练
@@ -81,9 +93,9 @@ $ python get_small_model.py --weights runs/train/exp*/weights/best_pruning.pt --
 
 ```shell
 $ python train.py --epochs 300 --cfg models/yolov5l.yaml --data data/fire.yaml --batch-size 16 --device 0 --use-pruning --skip-list 0 3 --pruning-method Network_Slimming \
---s 1 --print-sparse-frequency 2 --s_span 10 100 --warm_up_epoch 66
+--s 1 --print-sparse-frequency 2
 :<<! 
-其中 pring-sparse-frequency代表进行多少次epoch输出稀疏度直方图，直方图在`runs\train\exp*\weights\histogram`中，warm_up_epoch是我为了进行快速稀疏而对前n个epoch的scale进行方法，s代表scale
+其中 pring-sparse-frequency代表进行多少次epoch输出稀疏度直方图，直方图在`runs\train\exp*\weights\histogram`中，s代表scale
 !
 ```
 

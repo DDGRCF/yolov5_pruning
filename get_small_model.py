@@ -239,7 +239,7 @@ def pruning(weights,
                 state_dict_[n] = param.clone()      
 
     # 保存裁剪的配置
-    logger.info('the input channels pruning is completed!!!')
+    logger.info('the channels pruning is completed!!!')
     pruning_cfg = OrderedDict()
     index_ = -1
     for i, (n, param) in enumerate(state_dict_.items()):
@@ -268,11 +268,10 @@ def pruning(weights,
 
     # Load the parameters into small model
     new_state_dict = OrderedDict()
-    for i, (n1, n2) in enumerate(zip(state_dict_.items(), model_pruning.state_dict().items())):
-        assert n1[-1].shape == n2[-1].shape, 'there are errors in state_dict_'
-        new_state_dict[n2[0]] = state_dict_[n1[0]]
+    for i, (name, param) in enumerate(state_dict_.items()):
+        new_state_dict[name] = state_dict_[name]
 
-    model_pruning.load_state_dict(new_state_dict, strict=True)
+    model_pruning.load_state_dict(new_state_dict, strict=False)
     model_pruning.names = model.names
     # Evaluate the model
     model_compare(model, model_pruning, mode='features')

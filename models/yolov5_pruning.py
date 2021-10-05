@@ -123,7 +123,6 @@ class Model(nn.Module):
         for m in self.model:
             if m.f != -1:
                 x = y[m.f] if isinstance(m.f, int) else [x if j == -1 else y[j] for j in m.f]
-
             if profile:
                 pass
             x = m(x)

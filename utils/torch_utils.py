@@ -159,7 +159,7 @@ def initialize_weights(model, scale=False):
             m.eps = 1e-3
             m.momentum = 0.03
             if scale:
-                nn.init.constant_(m.weight.data, 0.5)
+                nn.init.constant_(m.weight.data, 1.0)
         elif t in [nn.Hardswish, nn.LeakyReLU, nn.ReLU, nn.ReLU6]:
             m.inplace = True
 

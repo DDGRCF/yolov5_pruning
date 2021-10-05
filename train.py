@@ -371,7 +371,7 @@ def train(hyp,  # path/to/hyp.yaml or hyp dictionary
             if ni - last_opt_step >= accumulate:
                 # BNOptimizer
                 if use_pruning and pruning_method == "Network_Slimming":
-                    bn_optimizer.updateBN(epoch, False, opt.warm_up_epoch)
+                    bn_optimizer.updateBN()
                 scaler.step(optimizer)  # optimizer.step
                 scaler.update()
                 optimizer.zero_grad()
@@ -580,7 +580,7 @@ def parse_opt(known=False):
     parser.add_argument('--local_rank', type=int, default=-1, help='DDP parameter, do not modify')
     # train prune config
     parser.add_argument('--use-pruning', action='store_true', help='whether use pruning or not')
-    parser.add_argument('--skip-list', type=int, nargs='*', default=[0, 3], help='the layers to skip')
+    parser.add_argument('--skip-list', type=int, nargs='*', default=None, help='the layers to skip')
     parser.add_argument('--pruning-method', type=str, default='SFP', help='SFP | Network Slimming')
     # SFP
     parser.add_argument('--pruning-frequency', type=int, default=1, help='the inter epoch to prune')
@@ -593,8 +593,6 @@ def parse_opt(known=False):
     # Network Slimming
     parser.add_argument('--s', type=float, default=0.01, help="the ratio of L1 norm")
     parser.add_argument('--print-sparse-frequency', type=int, default=5, help='the inter epoch to print histogram')
-    parser.add_argument('--s_span', type=float, nargs='*', default=[0.001, 500.0], help='various s_span')
-    parser.add_argument('--warm_up_epoch', type=int, default=150, help='warm np ratio')
     opt = parser.parse_known_args()[0] if known else parser.parse_args()
     return opt
 

@@ -35,7 +35,6 @@ class Bottleneck(nn.Module):
         self.cv1 = Conv(c_p1, 1, 1)
         self.cv2 = Conv(c_p2, 3, 1, g=g)
         self.register_buffer('keep_index', torch.LongTensor(c_p2[-1]))
-        
     def forward(self, x):
         if self.add: 
             if x.size(1) == len(self.keep_index):
